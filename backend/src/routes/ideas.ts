@@ -246,7 +246,7 @@ router.post('/', authenticateToken, [
     await idea.save();
     await idea.populate('author', 'name email');
 
-    const ideaObject = idea.toObject();
+    const ideaObject = idea.toObject() as any;
     ideaObject.likesCount = 0;
     ideaObject.isLikedByUser = false;
     ideaObject.pledgesCount = 0;
