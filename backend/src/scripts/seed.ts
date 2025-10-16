@@ -1,11 +1,11 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import User from '../models/User';
-import Idea from '../models/Idea';
-import Comment from '../models/Comment';
-import Like from '../models/Like';
-import Pledge from '../models/Pledge';
-import connectDB from '../config/database';
+import User from '../models/User.js';
+import Idea from '../models/Idea.js';
+import Comment from '../models/Comment.js';
+import Like from '../models/Like.js';
+import Pledge from '../models/Pledge.js';
+import connectDB from '../config/database.js';
 
 // Sample users data
 const sampleUsers = [
@@ -148,7 +148,7 @@ async function seedDatabase() {
       const idea = new Idea({
         title: ideaData.title,
         description: ideaData.description,
-        author: createdUsers[ideaData.authorIndex]._id
+        author: createdUsers[ideaData.authorIndex]!._id
       });
       await idea.save();
       createdIdeas.push(idea);
@@ -160,11 +160,11 @@ async function seedDatabase() {
     for (const commentData of sampleComments) {
       const comment = new Comment({
         content: commentData.content,
-        author: createdUsers[commentData.authorIndex]._id,
-        idea: createdIdeas[commentData.ideaIndex]._id
+        author: createdUsers[commentData.authorIndex]!._id,
+        idea: createdIdeas[commentData.ideaIndex]!._id
       });
       await comment.save();
-      console.log(`✅ Created comment by ${createdUsers[commentData.authorIndex].name}`);
+      console.log(`✅ Created comment by ${createdUsers[commentData.authorIndex]!.name}`);
     }
     
     // Create some likes
@@ -181,12 +181,12 @@ async function seedDatabase() {
     for (const { ideaIndex, userIndexes } of likeData) {
       for (const userIndex of userIndexes) {
         const like = new Like({
-          user: createdUsers[userIndex]._id,
-          idea: createdIdeas[ideaIndex]._id
+          user: createdUsers[userIndex]!._id,
+          idea: createdIdeas[ideaIndex]!._id
         });
         await like.save();
       }
-      console.log(`✅ Created ${userIndexes.length} likes for: ${createdIdeas[ideaIndex].title}`);
+      console.log(`✅ Created ${userIndexes.length} likes for: ${createdIdeas[ideaIndex]!.title}`);
     }
     
     // Create some pledges
@@ -203,13 +203,13 @@ async function seedDatabase() {
     for (const { ideaIndex, userIndexes } of pledgeData) {
       for (const userIndex of userIndexes) {
         const pledge = new Pledge({
-          user: createdUsers[userIndex]._id,
-          idea: createdIdeas[ideaIndex]._id,
+          user: createdUsers[userIndex]!._id,
+          idea: createdIdeas[ideaIndex]!._id,
           amount: 25 // Fixed $25 amount as per requirements
         });
         await pledge.save();
       }
-      console.log(`✅ Created ${userIndexes.length} pledges for: ${createdIdeas[ideaIndex].title}`);
+      console.log(`✅ Created ${userIndexes.length} pledges for: ${createdIdeas[ideaIndex]!.title}`);
     }
     
     console.log('🎉 Database seeding completed successfully!');

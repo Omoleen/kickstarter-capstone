@@ -1,4 +1,4 @@
-import { formatDate } from './utils';
+import { formatDate } from './utils.js';
 
 export const transformComment = (comment: any) => {
   if (!comment) {

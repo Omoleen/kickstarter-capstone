@@ -1,8 +1,8 @@
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import User from '../models/User';
-import { generateToken } from '../utils/jwt';
-import { transformUser } from '../transformers';
+import User from '../models/User.js';
+import { generateToken } from '../utils/jwt.js';
+import { transformUser } from '../transformers/index.js';
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ router.post('/register', [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }),
   body('name').trim().isLength({ min: 1 }),
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -31,7 +31,7 @@ router.post('/register', [
     await user.save();
 
     // Generate token
-    const token = generateToken(user._id.toString());
+    const token = generateToken((user._id as string).toString());
 
     res.status(201).json({
       message: 'User created successfully',
@@ -48,7 +48,7 @@ router.post('/register', [
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').exists(),
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -70,7 +70,7 @@ router.post('/login', [
     }
 
     // Generate token
-    const token = generateToken(user._id.toString());
+    const token = generateToken((user._id as string).toString());
 
     res.json({
       message: 'Login successful',

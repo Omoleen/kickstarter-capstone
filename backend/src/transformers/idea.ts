@@ -1,4 +1,4 @@
-import { formatDate } from './utils';
+import { formatDate } from './utils.js';
 
 export const transformIdea = (idea: any) => {
   if (!idea) {

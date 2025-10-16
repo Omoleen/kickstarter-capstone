@@ -1,9 +1,9 @@
-import express from 'express';
+import express, { type Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import Comment from '../models/Comment';
-import Idea from '../models/Idea';
-import { authenticateToken, AuthRequest } from '../middleware/auth';
-import { transformComment } from '../transformers';
+import Comment from '../models/Comment.js';
+import Idea from '../models/Idea.js';
+import { authenticateToken, type AuthRequest } from '../middleware/auth.js';
+import { transformComment } from '../transformers/index.js';
 
 const router = express.Router();
 
@@ -27,7 +27,7 @@ router.get('/idea/:ideaId', async (req, res) => {
 router.post('/', authenticateToken, [
   body('content').trim().isLength({ min: 1, max: 1000 }),
   body('ideaId').isMongoId(),
-], async (req: AuthRequest, res) => {
+], async (req: AuthRequest, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -66,7 +66,7 @@ router.post('/', authenticateToken, [
 // Update a comment (protected route - only author can update)
 router.put('/:id', authenticateToken, [
   body('content').trim().isLength({ min: 1, max: 1000 }),
-], async (req: AuthRequest, res) => {
+], async (req: AuthRequest, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -79,7 +79,7 @@ router.put('/:id', authenticateToken, [
     }
 
     // Check if user is the author
-    if (comment.author.toString() !== req.user!._id.toString()) {
+    if ((comment.author as any).toString() !== (req.user!._id as string).toString()) {
       return res.status(403).json({ message: 'Not authorized to update this comment' });
     }
 
@@ -108,7 +108,7 @@ router.delete('/:id', authenticateToken, async (req: AuthRequest, res) => {
     }
 
     // Check if user is the author
-    if (comment.author.toString() !== req.user!._id.toString()) {
+    if ((comment.author as any).toString() !== (req.user!._id as string).toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this comment' });
     }
 

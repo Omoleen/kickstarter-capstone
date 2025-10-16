@@ -1,10 +1,10 @@
 import "dotenv/config";
-import express from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
-import connectDB from "./config/database";
-import authRoutes from "./routes/auth";
-import ideaRoutes from "./routes/ideas";
-import commentRoutes from "./routes/comments";
+import connectDB from "./config/database.js";
+import authRoutes from "./routes/auth.js";
+import ideaRoutes from "./routes/ideas.js";
+import commentRoutes from "./routes/comments.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,7 +35,7 @@ app.get("/", (_req, res) => {
 });
 
 // Error handling middleware
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ message: "Something went wrong!" });
 });

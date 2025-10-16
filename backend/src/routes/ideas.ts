@@ -1,12 +1,12 @@
-import express from 'express';
+import express, { type Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import mongoose from 'mongoose';
-import Idea from '../models/Idea';
-import Comment from '../models/Comment';
-import Like from '../models/Like';
-import Pledge from '../models/Pledge';
-import { authenticateToken, optionalAuth, AuthRequest } from '../middleware/auth';
-import { transformIdea, transformComment } from '../transformers';
+import Idea from '../models/Idea.js';
+import Comment from '../models/Comment.js';
+import Like from '../models/Like.js';
+import Pledge from '../models/Pledge.js';
+import { authenticateToken, optionalAuth, type AuthRequest } from '../middleware/auth.js';
+import { transformIdea, transformComment } from '../transformers/index.js';
 
 const router = express.Router();
 
@@ -82,7 +82,7 @@ router.get('/user/my-ideas', authenticateToken, async (req: AuthRequest, res) =>
 
     const ideas = await Idea.aggregate([
       {
-        $match: { author: new mongoose.Types.ObjectId(userId.toString()) }
+        $match: { author: new mongoose.Types.ObjectId((userId as string).toString()) }
       },
       {
         $lookup: {
@@ -146,13 +146,13 @@ router.get('/:id', optionalAuth, async (req: AuthRequest, res) => {
     const userId = req.user?._id;
 
     // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(ideaId)) {
+    if (!ideaId || !mongoose.Types.ObjectId.isValid(ideaId)) {
       return res.status(400).json({ message: 'Invalid idea ID' });
     }
 
     const ideas = await Idea.aggregate([
       {
-        $match: { _id: new mongoose.Types.ObjectId(ideaId) }
+        $match: { _id: new mongoose.Types.ObjectId(ideaId!) }
       },
       {
         $lookup: {
@@ -228,7 +228,7 @@ router.get('/:id', optionalAuth, async (req: AuthRequest, res) => {
 router.post('/', authenticateToken, [
   body('title').trim().isLength({ min: 1, max: 200 }),
   body('description').trim().isLength({ min: 1, max: 5000 }),
-], async (req: AuthRequest, res) => {
+], async (req: AuthRequest, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -246,13 +246,15 @@ router.post('/', authenticateToken, [
     await idea.save();
     await idea.populate('author', 'name email');
 
-    const ideaObject = idea.toObject() as any;
-    ideaObject.likesCount = 0;
-    ideaObject.isLikedByUser = false;
-    ideaObject.pledgesCount = 0;
-    ideaObject.totalPledged = 0;
-    ideaObject.isPledgedByUser = false;
-    ideaObject.comments = [];
+    const ideaObject = {
+      ...idea.toObject(),
+      likesCount: 0,
+      isLikedByUser: false,
+      pledgesCount: 0,
+      totalPledged: 0,
+      isPledgedByUser: false,
+      comments: []
+    };
 
     res.status(201).json({
       message: 'Idea created successfully',
@@ -271,7 +273,7 @@ router.post('/:id/like', authenticateToken, async (req: AuthRequest, res) => {
     const userId = req.user!._id;
 
     // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(ideaId)) {
+    if (!ideaId || !mongoose.Types.ObjectId.isValid(ideaId)) {
       return res.status(400).json({ message: 'Invalid idea ID' });
     }
 
@@ -322,7 +324,7 @@ router.post('/:id/pledge', authenticateToken, async (req: AuthRequest, res) => {
     const userId = req.user!._id;
 
     // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(ideaId)) {
+    if (!ideaId || !mongoose.Types.ObjectId.isValid(ideaId)) {
       return res.status(400).json({ message: 'Invalid idea ID' });
     }
 
